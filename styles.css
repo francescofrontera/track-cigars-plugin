@@ -6,3 +6,11 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.cigar-search-plugin__search-modal--input {
+    padding-bottom: 18px;
+}
+
+.cigar-search-plugin__search-modal--input input {
+    width: 100%;
+}
