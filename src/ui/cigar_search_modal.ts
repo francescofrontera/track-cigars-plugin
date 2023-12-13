@@ -6,7 +6,7 @@ import { pipe } from "fp-ts/function";
 
 export default class SearchModal extends Modal {
 	private isBusy = false;
-	private okBtnRef?: ButtonComponent;
+	private sCigarBtnRef?: ButtonComponent;
 
 	constructor(
 		app: App,
@@ -17,25 +17,19 @@ export default class SearchModal extends Modal {
 		super(app);
 	}
 
-	setBusy(busy: boolean) {
+	#setBusy(busy: boolean) {
 		this.isBusy = busy;
-		this.okBtnRef?.setDisabled(busy);
-		this.okBtnRef?.setButtonText(busy ? "Searching cigar..." : "Search");
+		this.sCigarBtnRef?.setDisabled(busy);
+		this.sCigarBtnRef?.setButtonText(busy ? "Searching cigar..." : "Search");
 	}
 
-	submitEnterCallback(event: KeyboardEvent) {
-		if (event.key === "Enter" && !event.isComposing) {
-			this.searchCigar();
-		}
-	}
-
-	async searchCigar() {
+	async #searchCigar() {
 		if (!this.query) {
-			throw new Error("No query entered.");
+			this.callback(new Error("No query entered."), []) 
 		}
 
 		if (!this.isBusy) {
-			this.setBusy(true);
+			this.#setBusy(true);
 			await this.cigarAPI.getCigar(this.query).then((e) =>
 				pipe(
 					e,
@@ -45,8 +39,14 @@ export default class SearchModal extends Modal {
 					)
 				)
 			);
-			this.setBusy(false);
+			this.#setBusy(false);
 			this.close();
+		}
+	}
+
+	#submitEnterCallback(event: KeyboardEvent) {
+		if (event.key === "Enter" && !event.isComposing) {
+			this.#searchCigar();
 		}
 	}
 
@@ -64,18 +64,16 @@ export default class SearchModal extends Modal {
 					.onChange((value) => (this.query = value))
 					.inputEl.addEventListener(
 						"keydown",
-						this.submitEnterCallback.bind(this)
+						this.#submitEnterCallback.bind(this)
 					);
 			}
 		);
 
 		new Setting(contentEl).addButton((btn) => {
-			return (this.okBtnRef = btn
-				.setButtonText("Search")
+			return (this.sCigarBtnRef = btn
+				.setButtonText("Search by brand")
 				.setCta()
-				.onClick(() => {
-					this.searchCigar();
-				}));
+				.onClick(() => this.#searchCigar()));
 		});
 	}
 

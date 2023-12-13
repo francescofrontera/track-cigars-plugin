@@ -1,8 +1,7 @@
 import { CigarAPI, CigarAPIImpl } from "@apis/cigars";
 import { CigarFileAPI, CigarFileAPIImpl } from "@apis/file";
-import { AdditionalAttribute, Shape } from "@models/cigar.line.model";
+import { Shape } from "@models/cigar.line.model";
 import { Cigar } from "@models/cigar.model";
-import { CigarProduct } from "@models/cigar.product.model";
 import SearchCigarsSettingsTab, {
 	DEFAULT_SETTINGS,
 	SearchCigarsSettings,
@@ -11,16 +10,9 @@ import { CigarShapeSuggestModal } from "@ui/cigar_shape_suggest_modal";
 import { CigarSuggestModal } from "@ui/cigar_suggest_modal";
 import formatCigar from "@utils/formatter";
 import { either, option } from "fp-ts";
-import { Option } from "fp-ts/lib/Option";
 import { pipe } from "fp-ts/lib/function";
-import {
-	Notice,
-	Plugin,
-	TFile,
-} from "obsidian";
+import { Notice, Plugin, TFile } from "obsidian";
 import SearchModal from "src/ui/cigar_search_modal";
-
-// Remember to rename these classes and interfaces!
 
 export default class SearchCigarsPlugin extends Plugin {
 	settings: SearchCigarsSettings;
@@ -28,16 +20,17 @@ export default class SearchCigarsPlugin extends Plugin {
 	cigarFileAPI: CigarFileAPI;
 
 	async onload() {
-		await this.loadSettings();
-		this.addSettingTab(new SearchCigarsSettingsTab(this.app, this));
-
 		this.cigarAPI = new CigarAPIImpl();
 		this.cigarFileAPI = new CigarFileAPIImpl(this.app);
 
-		this.addRibbonIcon("cigarette", "Search Cigar", () => {
-			this.searchCigar();
-		});
+		await this.loadSettings();
+		this.addSettingTab(new SearchCigarsSettingsTab(this.app, this));
 
+
+		this.addRibbonIcon("cigarette", "Search Cigar", () =>
+			this.searchCigar()
+		);
+		
 		this.addCommand({
 			id: "search-sigar",
 			name: "Search a cigar",
@@ -60,55 +53,49 @@ export default class SearchCigarsPlugin extends Plugin {
 	}
 
 	async searchCigar(): Promise<void> {
-		const cigars = await this.openCigarSearchModal();
-		const selectedCigar = await this.openCigarSuggestModal(cigars);
-		const shape = await this.openCigarShapeSuggestModal(
-			selectedCigar.LineId
-		);
-		const product = await this.retriveProduct(shape.AdditionalAttributes);
-		const cigarAsMD = await formatCigar(shape, product);
-		const tfile = await this.cigarFileAPI.createCigarNote(
-			this.settings.folder,
-			shape.Name,
-			cigarAsMD
-		);
+		//TODO: Functional Or Not???
+		try {
+			const cigars = await this.openCigarSearchModal();
+			const selectedCigar = await this.openCigarSuggestModal(cigars);
+			const shape = await this.openCigarShapeSuggestModal(
+				selectedCigar.LineId
+			);
+			const product = pipe(
+				await this.cigarAPI.getCigarProduct(shape.Id),
+				option.fromEither
+			);
+			const cigarAsMD = await formatCigar(shape, product);
+			const tfile = await this.cigarFileAPI.createCigarNote(
+				this.settings.folder,
+				shape.Name,
+				cigarAsMD
+			);
 
-		pipe(
-			tfile,
-			either.match(
-				(err) => {
-					new Notice(
-						`An Error occurred during note creation: ${err}`
-					);
-				},
-				async (createdFile) => await this.openFile(createdFile)
-			)
-		);
+			pipe(
+				tfile,
+				either.match(
+					(err) => {
+						new Notice(
+							`An Error occurred during note creation: ${err}`
+						);
+					},
+					async (createdFile) => await this.openFile(createdFile)
+				)
+			);
+		} catch (e) {
+			new Notice((e as Error).message);
+		}
 	}
 
 	async openFile(createdFile: TFile): Promise<void> {
 		const activeLeaf = this.app.workspace.getLeaf();
-		if (!activeLeaf) {
-			console.warn("No active leaf");
-			return;
-		}
+
+		if (!activeLeaf) return;
 
 		await activeLeaf.openFile(createdFile, { state: { mode: "source" } });
 		activeLeaf.setEphemeralState({ rename: "all" });
 
 		new Notice(`Cigar file created: ${createdFile.path}!`);
-	}
-
-	async retriveProduct(
-		attributes: AdditionalAttribute[]
-	): Promise<Option<CigarProduct>> {
-		if (attributes && attributes.length > 0) {
-			const pId = attributes[0].ProductId;
-			const getProduct = await this.cigarAPI.getCigarProduct(pId);
-			return pipe(getProduct, option.fromEither);
-		}
-
-		return option.none;
 	}
 
 	// UI Actions

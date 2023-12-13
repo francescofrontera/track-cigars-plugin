@@ -4,8 +4,12 @@
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Track you smoked cigar in Obsidian",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"author": "Francesco Frontera",
+	"authorUrl": "Francesco Frontera <fra.frontera01@gmail.com>",
+	"fundingUrl": {
+		"Profile": "https://rhetorical-dimple-04f.notion.site/Francesco-Frontera-bfee447108c748e1b670ed919b08ae46?pvs=4",
+		"Paypal": "https://www.paypal.com/donate/?hosted_button_id=Z63P3W88V7QBA", 
+		"Contact Me": "https://tally.so/r/nro9DN"
+	},
 	"isDesktopOnly": false
 }

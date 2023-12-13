@@ -7,20 +7,20 @@ export interface CigarLine {
     AdUrl: string
     ImageUrl: string
     ImageUrlSmall: string
-    UserImageUrl: any
-    ImageOfSingleUrl: any
-    ImageOfSingleWidth: any
-    ImageOfSingleHeight: any
+    UserImageUrl: string
+    ImageOfSingleUrl: string
+    ImageOfSingleWidth: number
+    ImageOfSingleHeight: number
     RatingSummary: RatingSummary
-    MinBoxQty: any
-    MaxBoxQty: any
+    MinBoxQty: number
+    MaxBoxQty: number
     Prices: Prices
     PartnerPrices: PartnerPrices
     NeptunePrices: NeptunePrices
     Attributes: Attributes
-    IsCustom: any
-    CustomUserId: any
-    CustomUUID: any
+    IsCustom: boolean
+    CustomUserId: string
+    CustomUUID: string
     SocialPosts: number
     AdditionalAttributes: any[]
     Images: any[]
@@ -28,10 +28,6 @@ export interface CigarLine {
     Shapes: Shape[]
     BandHistory: BandHistory[]
     RelatedLines: any[]
-    MyRating: any
-    MyNote: any
-    MyCigarFeatures: any
-    Aux: Aux
   }
   
   export interface RatingSummary {

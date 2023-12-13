@@ -14,7 +14,9 @@ export interface CigarAPI {
 
 export class CigarAPIImpl implements CigarAPI {
 	getCigarProduct(productId: number): Promise<Either<Error, CigarProduct>> {
-		const retrieveCigarProduct = this.#httpCall<CigarLine>({
+		const productURL = `https://api.cigarscanner.com/api/cigars/products/${productId}`;
+		console.log("Product URL", productURL)
+		const retrieveCigarProduct = this.#httpCall<CigarProduct>({
 			url: `https://api.cigarscanner.com/api/cigars/products/${productId}`,
 			method: "GET",
 			contentType: "application/json",
