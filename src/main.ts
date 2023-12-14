@@ -26,11 +26,10 @@ export default class SearchCigarsPlugin extends Plugin {
 		await this.loadSettings();
 		this.addSettingTab(new SearchCigarsSettingsTab(this.app, this));
 
-
 		this.addRibbonIcon("cigarette", "Search Cigar", () =>
 			this.searchCigar()
 		);
-		
+
 		this.addCommand({
 			id: "search-sigar",
 			name: "Search a cigar",

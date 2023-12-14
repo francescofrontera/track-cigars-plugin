@@ -22,6 +22,7 @@ function withShapeAndProduct(shape: Shape, p: CigarProduct): string {
 name: ${shape.Name}
 shape: ${shape.Attributes.Shape}
 rating: ${shape.Rating.AverageRating}
+strength: ${p.Attributes.Strength}
 desc: ${p.Description}
 lenght: ${p.Attributes.Length}
 ring_gauge: ${p.Attributes.RingGauge}
@@ -31,7 +32,7 @@ man_box_qt: ${shape.MaxBoxQty}
 date: ${new Date().toLocaleDateString()}
 ---
 # ${shape.Name}
-![cover|500](https:${shape.ImageUrl})`;
+![cover|500](https:${shape.ImageOfSingleUrl})`;
 }
 
 export default function formatCigar(

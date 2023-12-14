@@ -10,8 +10,6 @@ export interface CigarFileAPI {
 		name: string,
 		renderContent: string
 	): Promise<Either<Error, TFile>>;
-
-	openCigarFile(fileToOpen: TFile): Promise<Either<Error, TFile>>;
 }
 
 export class CigarFileAPIImpl implements CigarFileAPI {
@@ -20,32 +18,13 @@ export class CigarFileAPIImpl implements CigarFileAPI {
 	constructor(app: App) {
 		this.app = app;
 	}
-	openCigarFile(fileToOpen: TFile): Promise<either.Either<Error, TFile>> {
-		return taskEither.tryCatch(
-			async () => {
-				const activeLeaf = this.app.workspace.getLeaf();
-				if (!activeLeaf) {
-					console.warn("No active leaf");
-					return fileToOpen;
-				}
-
-				await activeLeaf.openFile(fileToOpen, {
-					state: { mode: "source" },
-				});
-				activeLeaf.setEphemeralState({ rename: "all" });
-
-				return fileToOpen;
-			},
-			(reason) => new Error(String(reason))
-		)();
-	}
 
 	createCigarNote(
 		filePath: String,
 		name: string,
 		renderContent: string
 	): Promise<either.Either<Error, TFile>> {
-		const fileDate = new Date().toLocaleDateString().replaceAll("/", "-");
+		const fileDate = Date.now();
 		const fileName = name.trim();
 		const completePath = `${filePath}/${fileName}_${fileDate}.${FILE_EXTENSION}`;
 
