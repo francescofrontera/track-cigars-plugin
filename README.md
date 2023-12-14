@@ -9,7 +9,7 @@ Full example [here]()
 
 ## Features
 
-- Effortlessly search for cigars using the [CigarScanner API](https://www.cigarscanner.com/tabs/my-cigars/cigar-search/cigar/L-32101).
+- Effortlessly search for cigars using the [CigarScanner API](https://www.cigarscanner.com/about).
 
 - Create a draft note on specific folder;
 
