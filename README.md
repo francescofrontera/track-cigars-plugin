@@ -5,7 +5,7 @@
 Are you struggling to keep track of your favorite cigars? This plugin is designed to alleviate the cumbersome task of effortlessly recording the cigars you've smoked in Obsidian
 
 ## Example
-Full example [here]()
+Full example [here](https://www.loom.com/share/0294b83309a349c2b47432bc8ef3b64e?sid=c4fa9202-c301-4eb8-b821-a2dc044079ea)
 
 ## Features
 
