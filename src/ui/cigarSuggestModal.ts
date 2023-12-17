@@ -23,7 +23,7 @@ export class CigarSuggestModal extends SuggestModal<Cigar> {
 
 	// Renders each suggestion item.
 	renderSuggestion(cigar: Cigar, el: HTMLElement) {
-		const subtitle = `${cigar.Name}${cigar.LineName}${cigar.Rating.AverageRating}${cigar.Prices.SinglePriceMax}`;
+		const subtitle = `RatingAVG: ${cigar.Rating.AverageRating}, BoxPriceMax: ${cigar.Prices.BoxPriceMax}`;
 		el.createEl("div", { text: cigar.Name });
 		el.createEl("small", { text: subtitle });
 	}
@@ -34,7 +34,7 @@ export class CigarSuggestModal extends SuggestModal<Cigar> {
 	}
 
 	onClose(): void {
-		let { contentEl } = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }

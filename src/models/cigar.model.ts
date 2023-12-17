@@ -1,8 +1,8 @@
 export interface Cigar {
-    ProductId: any
+    ProductId: number
     LineId: number
     Name: string
-    ProductName: any
+    ProductName: string
     LineName: string
     ImageUrl: string
     Rating: Rating
@@ -40,8 +40,8 @@ export interface Cigar {
     WrapperColor: string
     StrengthId: number
     Strength: string
-    LengthId: any
-    Length: any
-    RingGauge: any
+    LengthId: string
+    Length: number
+    RingGauge: number
   }
   

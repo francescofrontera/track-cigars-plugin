@@ -7,10 +7,18 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-.cigar-search-plugin__search-modal--input {
+.search-modal-input {
     padding-bottom: 18px;
 }
 
-.cigar-search-plugin__search-modal--input input {
+.search-modal-input input {
     width: 100%;
+}
+
+.search-modal-button {
+    position: absolute;
+    margin-left: -50px;
+    left: 50%;
+    width: 110px;
+    bottom: 5px;
 }

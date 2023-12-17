@@ -7,7 +7,7 @@ export interface SearchCigarsSettings {
 }
 
 export const DEFAULT_SETTINGS: SearchCigarsSettings = {
-	folder: "cigars",
+	folder: "_cigars",
 };
 
 export default class SearchCigarsSettingsTab extends PluginSettingTab {
@@ -19,7 +19,7 @@ export default class SearchCigarsSettingsTab extends PluginSettingTab {
 	}
 
 	display() {
-		let { containerEl } = this;
+		const { containerEl } = this;
 
 		containerEl.empty();
 

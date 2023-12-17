@@ -1,28 +1,25 @@
-import { CigarAPI, CigarAPIImpl } from "@apis/cigars";
-import { CigarFileAPI, CigarFileAPIImpl } from "@apis/file";
+import { getCigarLine, getCigarProduct } from "@apis/cigars";
 import { Shape } from "@models/cigar.line.model";
 import { Cigar } from "@models/cigar.model";
 import SearchCigarsSettingsTab, {
 	DEFAULT_SETTINGS,
 	SearchCigarsSettings,
-} from "@settings/searchSigarSetting";
-import { CigarShapeSuggestModal } from "@ui/cigar_shape_suggest_modal";
-import { CigarSuggestModal } from "@ui/cigar_suggest_modal";
-import formatCigar from "@utils/formatter";
-import { either, option } from "fp-ts";
+} from "@settings/searchSigarsSetting";
+import { CigarShapeSuggestModal } from "@ui/cigarShapeSuggestModal";
+import { CigarSuggestModal } from "@ui/cigarSuggestModal";
+import { task as T, taskEither as TE } from "fp-ts";
 import { pipe } from "fp-ts/lib/function";
-import { Notice, Plugin, TFile } from "obsidian";
-import SearchModal from "src/ui/cigar_search_modal";
+import { App, Notice, Plugin, TFile } from "obsidian";
+import SearchModal from "@ui/cigarSearchModal";
+import { createCigarNote } from "@apis/file";
+import { TaskEither } from "fp-ts/lib/TaskEither";
+import shapeAndProductAsText from "@utils/text-formatter";
+import { CigarProduct } from "@models/cigar.product.model";
 
 export default class SearchCigarsPlugin extends Plugin {
 	settings: SearchCigarsSettings;
-	cigarAPI: CigarAPI;
-	cigarFileAPI: CigarFileAPI;
 
 	async onload() {
-		this.cigarAPI = new CigarAPIImpl();
-		this.cigarFileAPI = new CigarFileAPIImpl(this.app);
-
 		await this.loadSettings();
 		this.addSettingTab(new SearchCigarsSettingsTab(this.app, this));
 
@@ -52,88 +49,104 @@ export default class SearchCigarsPlugin extends Plugin {
 	}
 
 	async searchCigar(): Promise<void> {
-		//TODO: Functional Or Not???
-		try {
-			const cigars = await this.openCigarSearchModal();
-			const selectedCigar = await this.openCigarSuggestModal(cigars);
-			const shape = await this.openCigarShapeSuggestModal(
-				selectedCigar.LineId
-			);
-			const product = pipe(
-				await this.cigarAPI.getCigarProduct(shape.Id),
-				option.fromEither
-			);
-			const cigarAsMD = await formatCigar(shape, product);
-			const tfile = await this.cigarFileAPI.createCigarNote(
-				this.settings.folder,
-				shape.Name,
-				cigarAsMD
-			);
+		const app = this.app;
+		const folder = this.settings.folder;
 
-			pipe(
-				tfile,
-				either.match(
-					(err) => {
-						new Notice(
-							`An Error occurred during note creation: ${err}`
-						);
-					},
-					async (createdFile) => await this.openFile(createdFile)
+		await pipe(
+			this.openCigarSearchModal(app),
+			TE.flatMap((cigars) => this.openCigarSuggestModal(app, cigars)),
+			TE.flatMap((c) => this.openCigarShapeSuggestModal(app, c.LineId)),
+			TE.flatMap((s) =>
+				pipe(
+					getCigarProduct(s.Id),
+					TE.map((p) => [s, p])
 				)
-			);
-		} catch (e) {
-			new Notice((e as Error).message);
-		}
+			),
+			TE.flatMap(([s, p]) =>
+				pipe(
+					shapeAndProductAsText(s as Shape, p as CigarProduct),
+					TE.flatMap((content) =>
+						createCigarNote(app.vault, folder, s.Name, content)
+					)
+				)
+			),
+			TE.flatMap((f) => this.openFile(app, f)),
+			TE.fold(
+				(e) => {
+					console.log(e);
+					return T.of(new Notice(e.message));
+				},
+				(tFile) => {
+					return T.of(new Notice(tFile.path));
+				}
+			)
+		)();
 	}
 
-	async openFile(createdFile: TFile): Promise<void> {
-		const activeLeaf = this.app.workspace.getLeaf();
+	openFile(app: App, createdFile: TFile): TaskEither<Error, TFile> {
+		return TE.tryCatch(
+			() => {
+				const activeLeaf = app.workspace.getLeaf();
 
-		if (!activeLeaf) return;
+				if (!activeLeaf) throw Error("no leaft");
 
-		await activeLeaf.openFile(createdFile, { state: { mode: "source" } });
-		activeLeaf.setEphemeralState({ rename: "all" });
-
-		new Notice(`Cigar file created: ${createdFile.path}!`);
+				return activeLeaf
+					.openFile(createdFile, {
+						state: { mode: "source" },
+					})
+					.then((_) =>
+						activeLeaf.setEphemeralState({ rename: "all" })
+					)
+					.then(() => createdFile);
+			},
+			(reason) => new Error(String(reason))
+		);
 	}
 
 	// UI Actions
-	async openCigarSearchModal(query = ""): Promise<Cigar[]> {
-		return new Promise<Cigar[]>((resolve, reject) => {
-			return new SearchModal(
-				this.app,
-				query,
-				this.cigarAPI,
-				(error, results) => {
-					return error ? reject(error) : resolve(results);
-				}
-			).open();
-		});
-	}
-
-	async openCigarSuggestModal(cigars: Cigar[]): Promise<Cigar> {
-		return new Promise<Cigar>((resolve) => {
-			return new CigarSuggestModal(this.app, cigars, (selectedCigar) =>
-				resolve(selectedCigar)
-			).open();
-		});
-	}
-
-	async openCigarShapeSuggestModal(lineId: number): Promise<Shape> {
-		const shapes = pipe(
-			await this.cigarAPI.getCigarLine(lineId),
-			either.fold(
-				(_) => [] as Shape[],
-				(v) => v.Shapes
-			)
+	openCigarSearchModal(app: App, query = ""): TaskEither<Error, Cigar[]> {
+		return TE.tryCatch(
+			() =>
+				new Promise<Cigar[]>((resolve, reject) => {
+					return new SearchModal(app, query, (error, results) => {
+						return error ? reject(error) : resolve(results);
+					}).open();
+				}),
+			(reason) => new Error(String(reason))
 		);
+	}
 
-		return new Promise<Shape>((resolve) => {
-			return new CigarShapeSuggestModal(
-				this.app,
-				shapes,
-				(selectedShape) => resolve(selectedShape)
-			).open();
-		});
+	openCigarSuggestModal(app: App, cigars: Cigar[]): TaskEither<Error, Cigar> {
+		return TE.tryCatch(
+			() =>
+				new Promise<Cigar>((resolve) => {
+					return new CigarSuggestModal(app, cigars, (selectedCigar) =>
+						resolve(selectedCigar)
+					).open();
+				}),
+			(reason) => new Error(String(reason))
+		);
+	}
+
+	openCigarShapeSuggestModal(
+		app: App,
+		lineId: number
+	): TaskEither<Error, Shape> {
+		return pipe(
+			getCigarLine(lineId),
+			TE.flatMap((cLine) => {
+				return TE.tryCatch(
+					() =>
+						new Promise<Shape>((resolve) => {
+							return new CigarShapeSuggestModal(
+								app,
+								cLine.Shapes,
+								(selectedShape) => resolve(selectedShape)
+							).open();
+						}),
+					(reason) => new Error(String(reason))
+				);
+			})
+		);
 	}
 }

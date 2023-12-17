@@ -1,6 +1,6 @@
 import { Cigar } from "src/models/cigar.model";
 import { App, ButtonComponent, Modal, Setting, TextComponent } from "obsidian";
-import { CigarAPI } from "@apis/cigars";
+import { getCigar } from "@apis/cigars";
 import { either } from "fp-ts";
 import { pipe } from "fp-ts/function";
 
@@ -11,7 +11,6 @@ export default class SearchModal extends Modal {
 	constructor(
 		app: App,
 		private query: string,
-		private readonly cigarAPI: CigarAPI,
 		private callback: (err: Error | undefined, result: Cigar[]) => void
 	) {
 		super(app);
@@ -30,7 +29,7 @@ export default class SearchModal extends Modal {
 
 		if (!this.isBusy) {
 			this.#setBusy(true);
-			await this.cigarAPI.getCigar(this.query).then((e) =>
+			await getCigar(this.query).then((e) =>
 				pipe(
 					e,
 					either.fold(
@@ -56,7 +55,7 @@ export default class SearchModal extends Modal {
 		contentEl.createEl("h1", { text: "Search Cigar" });
 
 		contentEl.createDiv(
-			{ cls: "cigar-search-plugin__search-modal--input" },
+			{ cls: "search-modal-input" },
 			(settingItem) => {
 				new TextComponent(settingItem)
 					.setValue(this.query)
@@ -71,6 +70,7 @@ export default class SearchModal extends Modal {
 
 		new Setting(contentEl).addButton((btn) => {
 			return (this.sCigarBtnRef = btn
+				.setClass("search-modal-button")
 				.setButtonText("Search by brand")
 				.setCta()
 				.onClick(() => this.#searchCigar()));
@@ -78,7 +78,7 @@ export default class SearchModal extends Modal {
 	}
 
 	onClose(): void {
-		let { contentEl } = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }

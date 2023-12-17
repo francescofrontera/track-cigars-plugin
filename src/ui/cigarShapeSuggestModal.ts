@@ -12,18 +12,18 @@ export class CigarShapeSuggestModal extends SuggestModal<Shape> {
 
 	// Returns all available suggestions.
 	getSuggestions(query: string): Shape[] {
-		return this.suggestion.filter(shape => {
-            const searchQuery = query.toLowerCase()
-            return (
-                shape.Name.toLowerCase().includes(searchQuery) ||
-                shape.Attributes.Length.toLowerCase().includes(searchQuery)
-            )
-        });
+		return this.suggestion.filter((shape) => {
+			const searchQuery = query.toLowerCase();
+			return (
+				shape.Name.toLowerCase().includes(searchQuery) ||
+				shape.Attributes.Length.toLowerCase().includes(searchQuery)
+			);
+		});
 	}
 
 	// Renders each suggestion item.
 	renderSuggestion(s: Shape, el: HTMLElement) {
-		const subtitle = `Length: ${s.Attributes.Length}, Price: ${s.Prices.SinglePrice}$`;
+		const subtitle = s.Attributes.Shape ? `${s.Attributes.Shape}` : "";
 		el.createEl("div", { text: s.Name });
 		el.createEl("small", { text: subtitle });
 	}
@@ -34,7 +34,7 @@ export class CigarShapeSuggestModal extends SuggestModal<Shape> {
 	}
 
 	onClose(): void {
-		let { contentEl } = this;
+		const { contentEl } = this;
 		contentEl.empty();
 	}
 }
