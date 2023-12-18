@@ -55,31 +55,19 @@ export default class SearchCigarsPlugin extends Plugin {
 		await pipe(
 			this.openCigarSearchModal(app),
 			TE.flatMap((cigars) => this.openCigarSuggestModal(app, cigars)),
-			TE.flatMap((c) => this.openCigarShapeSuggestModal(app, c.LineId)),
-			TE.flatMap((s) =>
-				pipe(
-					getCigarProduct(s.Id),
-					TE.map((p) => [s, p])
-				)
-			),
+			TE.flatMap((cigar) => this.openCigarShapeSuggestModal(app, cigar.LineId)),
+			TE.flatMap((shape) => pipe(getCigarProduct(shape.Id), TE.map((p) => [shape, p]))),
 			TE.flatMap(([s, p]) =>
 				pipe(
 					shapeAndProductAsText(s as Shape, p as CigarProduct),
-					TE.flatMap((content) =>
-						createCigarNote(app.vault, folder, s.Name, content)
-					)
+					TE.flatMap((content) => createCigarNote(app.vault, folder, s.Name, content))
 				)
 			),
 			TE.flatMap((f) => this.openFile(app, f)),
 			TE.fold(
-				(e) => {
-					console.log(e);
-					return T.of(new Notice(e.message));
-				},
-				(tFile) => {
-					return T.of(new Notice(tFile.path));
-				}
-			)
+				(e) =>  T.of(new Notice(e.message)),
+				(tFile) => T.of(new Notice(`A new note for the cigar has been created in the ${tFile.path}`)
+			))
 		)();
 	}
 
@@ -88,7 +76,7 @@ export default class SearchCigarsPlugin extends Plugin {
 			() => {
 				const activeLeaf = app.workspace.getLeaf();
 
-				if (!activeLeaf) throw Error("no leaft");
+				if (!activeLeaf) throw Error("no leaf is available");
 
 				return activeLeaf
 					.openFile(createdFile, {

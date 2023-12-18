@@ -9,9 +9,6 @@ export interface Cigar {
     ScansCount: number
     Prices: Prices
     Attributes: Attributes
-    LogId: any
-    List: any
-    InLists: any
   }
   
   export interface Rating {
@@ -24,14 +21,14 @@ export interface Cigar {
     SinglePriceMax: number
     BoxPriceMin: number
     BoxPriceMax: number
-    DisplayPartnerPrices: any
+    DisplayPartnerPrices: number
   }
   
   export interface Attributes {
-    ShapeId: any
-    Shape: any
-    SectionId: any
-    Section: any
+    ShapeId: string
+    Shape: string
+    SectionId: string
+    Section: string
     OriginId: number
     Origin: string
     WrapperId: number

@@ -7,7 +7,7 @@ export interface CigarProduct {
     AdUrl: string
     ImageUrl: string
     ImageUrlSmall: string
-    UserImageUrl: any
+    UserImageUrl: string
     ImageOfSingleUrl: string
     ImageOfSingleWidth: number
     ImageOfSingleHeight: number
@@ -19,18 +19,11 @@ export interface CigarProduct {
     NeptunePrices: NeptunePrices
     Attributes: Attributes
     IsCustom: boolean
-    CustomUserId: any
-    CustomUUID: any
-    SocialPosts: number
-    AdditionalAttributes: any[]
+    CustomUserId: string
+    CustomUUID: string
     Images: Image[]
     Tags: Tag[]
-    Shapes: any[]
     BandHistory: BandHistory[]
-    RelatedLines: any[]
-    MyRating: any
-    MyNote: any
-    MyCigarFeatures: any
     Aux: Aux
   }
   
@@ -49,14 +42,14 @@ export interface CigarProduct {
     SinglePriceMax: number
     BoxPriceMin: number
     BoxPriceMax: number
-    DisplayPartnerPrices: any
+    DisplayPartnerPrices: number
   }
   
   export interface PartnerPrices {
-    PartnerSinglePriceMin: any
-    PartnerSinglePriceMax: any
-    PartnerBoxPriceMin: any
-    PartnerBoxPriceMax: any
+    PartnerSinglePriceMin: number
+    PartnerSinglePriceMax: number
+    PartnerBoxPriceMin: number
+    PartnerBoxPriceMax: number
   }
   
   export interface NeptunePrices {
@@ -101,8 +94,6 @@ export interface CigarProduct {
     SinglePackaging: string
     IsSpecific: boolean
     MasterLine: string
-    CARating: any
-    CIRating: any
   }
   
   export interface Image {

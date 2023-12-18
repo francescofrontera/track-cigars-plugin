@@ -19,12 +19,12 @@ export default class SearchModal extends Modal {
 	#setBusy(busy: boolean) {
 		this.isBusy = busy;
 		this.sCigarBtnRef?.setDisabled(busy);
-		this.sCigarBtnRef?.setButtonText(busy ? "Searching cigar..." : "Search");
+		this.sCigarBtnRef?.setButtonText(busy ? "Searching cigar..." : "Search by brand");
 	}
 
 	async #searchCigar() {
 		if (!this.query) {
-			this.callback(new Error("No query entered."), []) 
+			this.callback(new Error("No brand/cigar entered."), []) 
 		}
 
 		if (!this.isBusy) {

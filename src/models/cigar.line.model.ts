@@ -1,5 +1,5 @@
 export interface CigarLine {
-	ProductId: any;
+	ProductId: string;
 	LineId: number;
 	Name: string;
 	Description: string;
