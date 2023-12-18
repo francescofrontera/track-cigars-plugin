@@ -1,4 +1,4 @@
-# Obsidian Cigar Tracker Plugin
+# Obsidian Cigars Tracker Plugin
 
 ## Overview
 
